@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0d0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sportsbet">
+<title>Sportsbet command center</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='%230ca30c'/></svg>">
+<style>
+:root{color-scheme:light dark;
+--surface:#fcfcfb;--plane:#f4f4f1;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;
+--grid:#e1e0d9;--border:rgba(11,11,11,.11);
+--s1:#2a78d6;--s2:#eb6834;--s3:#1a9e73;--good:#0ca30c;--warn:#c98600;--crit:#d03b3b;--up:#0a7d0a;}
+@media(prefers-color-scheme:dark){:root{
+--surface:#1a1a19;--plane:#0d0d0d;--ink:#fff;--ink2:#c3c2b7;--muted:#898781;
+--grid:#2c2c2a;--border:rgba(255,255,255,.11);
+--s1:#3987e5;--s2:#d95926;--s3:#22b98a;--good:#12b312;--warn:#fab219;--crit:#e05555;--up:#12b312;}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0 auto;background:var(--plane);color:var(--ink);
+font:15px/1.5 -apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",sans-serif;
+padding:14px 14px calc(34px + env(safe-area-inset-bottom));max-width:1180px}
+h1{font-size:17px;margin:0;letter-spacing:-.01em}
+h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+margin:0;font-weight:600}
+.sub{color:var(--ink2);font-size:12px;margin:3px 0 0}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+padding-bottom:14px;border-bottom:1px solid var(--grid);margin-bottom:16px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;
+font-size:13px;font-weight:650;border:1px solid var(--border);background:var(--surface);
+white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.pulse{animation:p 2s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* section headers carry a count and a one-line explanation */
+.sec{margin:30px 0 10px}
+.sec:first-of-type{margin-top:22px}
+.sechead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.count{font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;
+background:var(--surface);border:1px solid var(--border);color:var(--ink2)}
+.secsub{color:var(--muted);font-size:12px;margin-top:4px;max-width:76ch}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+padding:13px 14px;margin-bottom:9px}
+.card.click{cursor:pointer}
+.tophead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.nm{font-weight:650;font-size:15.5px;line-height:1.3}
+.one{color:var(--ink2);font-size:13px;margin-top:3px}
+.meta{color:var(--muted);font-size:11.5px;margin-top:4px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;
+font-size:10.5px;font-weight:700;letter-spacing:.04em;border:1px solid currentColor;
+white-space:nowrap}
+.chip.plain{border-color:var(--border);color:var(--ink2);font-weight:600;letter-spacing:0}
+
+/* headline number row inside a card */
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;
+margin-top:11px}
+.num{background:var(--plane);border-radius:9px;padding:8px 10px}
+.num .k{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
+font-weight:600}
+.num .v{font-size:18px;font-weight:650;margin-top:2px;font-variant-numeric:tabular-nums;
+letter-spacing:-.01em;line-height:1.2}
+.num .n{font-size:11px;color:var(--ink2);margin-top:2px;line-height:1.35}
+
+.big{font-size:26px;font-weight:660;font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+line-height:1.15;margin-top:2px}
+.hl{background:var(--plane);border-radius:10px;padding:11px 12px;margin-top:11px}
+.hl .k{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
+font-weight:600}
+.hl .n{font-size:11.5px;color:var(--ink2);margin-top:3px}
+
+a{color:var(--s1);text-decoration:none}
+a:hover{text-decoration:underline}
+.golink{font-size:12.5px;font-weight:650;display:inline-block}
+details{margin-top:10px}
+details>summary{list-style:none;cursor:pointer;font-size:12px;font-weight:650;
+color:var(--s1);padding:6px 0 2px;display:flex;align-items:center;gap:6px;user-select:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸";font-size:10px;transition:transform .12s}
+details[open]>summary::before{transform:rotate(90deg)}
+.dbody{padding-top:8px;border-top:1px solid var(--grid);margin-top:6px}
+.dbody h3{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+margin:16px 0 6px;font-weight:600}
+.dbody h3:first-child{margin-top:4px}
+p{margin:0 0 9px;font-size:13.5px;line-height:1.62;color:var(--ink2)}
+p:last-child{margin-bottom:0}
+p.lead{color:var(--ink)}
+ul{margin:0 0 9px;padding-left:18px;font-size:13px;color:var(--ink2);line-height:1.6}
+li{margin-bottom:3px}
+.next{background:color-mix(in srgb,var(--s1) 8%,var(--surface));border-left:2px solid var(--s1);
+padding:9px 11px;border-radius:0 8px 8px 0;font-size:13px;color:var(--ink2);margin:10px 0 0}
+.next b{color:var(--ink);font-weight:650}
+.caveat{background:color-mix(in srgb,var(--warn) 9%,var(--surface));
+border-left:2px solid var(--warn);padding:9px 11px;border-radius:0 8px 8px 0;
+font-size:12.5px;color:var(--ink2);margin:10px 0 0}
+.path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;
+color:var(--muted);word-break:break-all;margin-top:9px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;
+word-break:break-all}
+.dim{color:var(--muted)}
+.up{color:var(--up)}.down{color:var(--crit)}
+
+table{width:100%;border-collapse:collapse;background:var(--plane);
+border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:13px;
+margin-bottom:4px}
+th{text-align:left;font-size:10px;letter-spacing:.05em;text-transform:uppercase;
+color:var(--muted);padding:7px 9px;border-bottom:1px solid var(--grid);font-weight:600}
+td{padding:6px 9px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:none}
+.r{text-align:right}
+.empty{color:var(--muted);font-size:13px;padding:15px 14px;background:var(--surface);
+border:1px dashed var(--border);border-radius:12px;margin-bottom:9px;line-height:1.6}
+.stale{background:color-mix(in srgb,var(--crit) 12%,var(--surface));
+border:1px solid var(--crit);border-radius:12px;padding:11px 13px;margin-bottom:10px;
+font-size:13px;font-weight:600;color:var(--crit)}
+.warnbar{background:color-mix(in srgb,var(--warn) 13%,var(--surface));
+border:1px solid var(--warn);border-radius:12px;padding:11px 13px;margin-bottom:10px;
+font-size:13px;font-weight:600;color:var(--warn)}
+footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--grid);
+color:var(--muted);font-size:11.5px;line-height:1.65}
+.hide-sm{display:none}
+@media(min-width:700px){.hide-sm{display:table-cell}}
+
+/* --- retired 004 bet cards (unchanged rendering, kept behind the retired entry) */
+.betgrid{display:grid;grid-template-columns:1fr;gap:9px}
+@media(min-width:720px){.betgrid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1050px){.betgrid{grid-template-columns:repeat(3,1fr)}}
+.bet{background:var(--plane);border:1px solid var(--border);border-radius:12px;
+padding:11px 12px 9px}
+.bet.won{border-color:color-mix(in srgb,var(--good) 55%,var(--border))}
+.bet.lost{border-color:color-mix(in srgb,var(--crit) 32%,var(--border))}
+.bethead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.bet .nm{font-weight:650;font-size:14px;line-height:1.25}
+.bet .bmeta{color:var(--muted);font-size:11.5px;margin-top:2px;overflow:hidden;
+text-overflow:ellipsis;white-space:nowrap;max-width:24ch}
+.res{font-size:15px;font-weight:650;font-variant-numeric:tabular-nums;
+display:inline-block;margin-top:4px}
+.chart{width:100%;height:auto;display:block;margin:7px 0 5px}
+.nochart{font-size:12px;padding:22px 0;text-align:center}
+.betfoot{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--ink2);
+font-variant-numeric:tabular-nums;border-top:1px solid var(--grid);padding-top:7px}
+.bet.multi{border-width:1.5px}
+.bet.multi .bmeta{max-width:none;white-space:normal}
+.legs{display:grid;gap:7px;border-top:1px solid var(--grid);padding-top:6px}
+.leg{font-size:11.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.legtop{display:flex;align-items:center;gap:6px}
+.legsub{font-size:11px;padding-left:16px;margin-top:1px}
+.leg .who{font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;
+text-overflow:ellipsis}
+.leg .legpnl{margin-left:auto;font-weight:650;white-space:nowrap}
+.swatch{width:10px;height:3px;border-radius:2px;flex:none}
+@media(min-width:720px){.bet.multi{grid-column:span 2}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Sportsbet command center</h1>
+    <div class="sub" id="sub">loading&hellip;</div>
+  </div>
+  <span class="pill" id="statepill"><span class="dot"></span><span id="statetxt">&hellip;</span></span>
+</header>
+
+<div id="alert"></div>
+<div id="body"></div>
+<footer id="foot"></footer>
+
+<script>
+const REFRESH = 20000;
+let last = null;
+// Which expanders are open, by key. innerHTML is rebuilt on every tick, so without
+// this every open panel would slam shut every 20 seconds.
+const OPEN = new Set();
+
+const esc = s => String(s === null || s === undefined ? "" : s)
+  .replace(/[&<>"]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const usd = c => c === null || c === undefined ? "&mdash;"
+  : (c < 0 ? "-$" : "$") + (Math.abs(c)/100).toLocaleString(undefined,
+      {minimumFractionDigits:2, maximumFractionDigits:2});
+const n1 = (v,d) => v === null || v === undefined ? "&mdash;" : Number(v).toFixed(d===undefined?1:d);
+
+function ago(ts){
+  if(!ts) return "never";
+  let d = Math.floor(Date.now()/1000 - ts);
+  if(d < 0) d = 0;
+  return dur(d) + " ago";
+}
+function dur(d){
+  if(d === null || d === undefined) return "&mdash;";
+  d = Math.floor(d);
+  if(d < 60) return d + "s";
+  if(d < 3600) return Math.floor(d/60) + "m";
+  if(d < 86400) return Math.floor(d/3600) + "h " + Math.floor(d%3600/60) + "m";
+  return Math.floor(d/86400) + "d";
+}
+const COL = {good:"var(--good)", warn:"var(--warn)", crit:"var(--crit)",
+             s1:"var(--s1)", s3:"var(--s3)", muted:"var(--muted)"};
+function chip(text, cls, pulse){
+  return "<span class='chip' style='color:" + (COL[cls]||"var(--ink2)") + "'>" +
+    (pulse ? "<span class='dot" + (pulse===2?" pulse":"") + "'></span>" : "") +
+    esc(text) + "</span>";
+}
+function tbl(head, rows, hideSm, align){
+  hideSm = hideSm || []; align = align || [];
+  return "<table><tr>" + head.map((h,i) =>
+    "<th class='" + (hideSm[i]?"hide-sm ":"") + (align[i]==="r"?"r":"") + "'>" + h + "</th>").join("") +
+    "</tr>" + rows.map(r => "<tr>" + r.map((c,i) =>
+    "<td class='" + (hideSm[i]?"hide-sm ":"") + (align[i]==="r"?"r":"") + "'>" + c + "</td>").join("") +
+    "</tr>").join("") + "</table>";
+}
+// An expander whose open/closed state survives the 20s re-render.
+function fold(key, label, inner){
+  const open = OPEN.has(key) ? " open" : "";
+  return "<details data-k='" + esc(key) + "'" + open + "><summary>" + esc(label) +
+    "</summary><div class='dbody'>" + inner + "</div></details>";
+}
+function paras(arr, lead){
+  return (arr||[]).map((t,i) => "<p" + (lead && i===0 ? " class='lead'" : "") + ">" +
+    esc(t) + "</p>").join("");
+}
+function numrow(list){
+  if(!list || !list.length) return "";
+  return "<div class='nums'>" + list.map(([k,v,n]) =>
+    "<div class='num'><div class='k'>" + k + "</div><div class='v'>" + v + "</div>" +
+    (n ? "<div class='n'>" + n + "</div>" : "") + "</div>").join("") + "</div>";
+}
+
+/* ============================ 1. BOTS ==================================== */
+
+function botCard(b, d){
+  const live = b.live;
+  const cls = live ? "good" : "muted";
+  let h = "<div class='card'><div class='tophead'><div>" +
+    "<div class='nm'>" + esc(b.name) + "</div>" +
+    "<div class='one'>" + esc(b.one_line) + "</div>" +
+    "<div class='meta'>" + esc(b.venue) + " &middot; " + esc(b.since) +
+      (b.until ? " → " + esc(b.until) : "") + "</div></div>" +
+    "<div style='text-align:right;flex:none'>" + chip(b.status, cls) + "</div></div>";
+
+  if(b.id === "004"){
+    const det = b.detail || {};
+    h += numrow([
+      ["Realized", "<span class='" + (b.realized_c>0?"up":b.realized_c<0?"down":"") + "'>" +
+        usd(b.realized_c) + "</span>", b.settled_n + " settled, both venues &middot; " +
+        b.won_n + " won"],
+      ["Contracts", (det.contracts||0).toLocaleString(), (det.fills||[]).length + " fills recorded"],
+      ["Markets armed", det.armed_n || 0, "over two live days"],
+      ["Fees paid", usd(b.fees_c), "maker side"]
+    ]);
+    h += fold("bot-004-why", "Why it stopped",
+      paras(b.why_stopped, true));
+    h += fold("bot-004-detail", "The engine's own record — every bet, charted",
+      "<p>" + esc(b.detail_note) + "</p>" + bot004Detail(det, b));
+  }
+  return h + "</div>";
+}
+
+function bot004Detail(det, b){
+  let o = "";
+  const groups = det.bet_groups || [];
+  o += "<h3>Every bet</h3>";
+  if(groups.length){
+    o += "<div class='betgrid'>" + groups.map(groupCard).join("") + "</div>" +
+      "<p class='dim' style='font-size:11.5px;margin-top:8px'>Each chart is the market's " +
+      "mid price over the match, in cents. The shaded band is the 0&ndash;12&cent; despair " +
+      "zone; dashed lines mark where the engine armed; dots are fills. Where both venues " +
+      "traded the same match they share one axis.</p>";
+  } else {
+    o += "<p class='dim'>No bet records" + (det.bets_error ? " (" + esc(det.bets_error) + ")" : "") + ".</p>";
+  }
+  const st = b.settlements || [];
+  o += "<h3>Settled</h3>";
+  o += st.length ? tbl(["When","Market","Qty","Cost","Payout","Net"],
+    st.slice(0,25).map(s => ["<span class='dim'>" + ago(s.ts) + "</span>",
+      "<span class='mono'>" + esc(s.ticker) + "</span>", s.qty, usd(s.cost_c),
+      usd(s.revenue_c),
+      "<span class='" + (s.pnl_c>0?"up":s.pnl_c<0?"down":"dim") + "'>" +
+        (s.pnl_c>0?"+":"") + usd(s.pnl_c) + "</span>"]),
+    [true,false,true,true,true,false], ["","","r","r","r","r"])
+    : "<p class='dim'>Nothing settled.</p>";
+  if((det.pm_settled||[]).length){
+    o += "<h3>Settled — Polymarket</h3>" + tbl(["When","Market","Qty","Cost","Payout","Net"],
+      det.pm_settled.map(s => ["<span class='dim'>" + ago(s.ts) + "</span>",
+        "<span class='mono'>" + esc(s.slug) + "</span>", s.qty, usd(s.cost_c), usd(s.payout_c),
+        "<span class='" + (s.pnl_c>0?"up":s.pnl_c<0?"down":"dim") + "'>" +
+          (s.pnl_c>0?"+":"") + usd(s.pnl_c) + "</span>"]),
+      [true,false,true,true,true,false], ["","","r","r","r","r"]);
+  }
+  const lg = det.logs || [];
+  if(lg.length){
+    o += "<h3>Last engine log lines</h3>" + tbl(["When","Level","Event","Detail"],
+      lg.map(l => ["<span class='dim'>" + ago(l.ts) + "</span>",
+        "<span style='font-weight:650;color:" +
+          ({ERROR:"var(--crit)",WARN:"var(--warn)"}[l.level]||"var(--ink2)") + "'>" +
+          esc(l.level) + "</span>", esc(l.event),
+        "<span class='mono dim'>" + esc((l.detail||"").slice(0,110)) + "</span>"]),
+      [false,false,false,true]);
+  }
+  return o;
+}
+
+/* ============================ 2. PROBES ================================== */
+
+function probeCard(p){
+  const stale = p.replica_stale;
+  let h = "<div class='card'><div class='tophead'><div>" +
+    "<div class='nm'>" + esc(p.name) + "</div>" +
+    "<div class='one'>" + esc(p.measures) + "</div>" +
+    "<div class='meta'>" + esc(p.unit) + " on " + esc(p.host) + " &middot; live since " +
+      esc(p.since) + " &middot; coid <span class='mono'>" + esc(p.coid_prefix) + "</span></div>" +
+    "</div><div style='text-align:right;flex:none'>" +
+      chip(p.verdict, p.verdict_class, p.verdict === "HEALTHY" ? 2 : 1) + "</div></div>";
+
+  if(!p.available){
+    return h + "<div class='caveat'>No local replica of <span class='mono'>" +
+      esc(p.db) + "</span> yet — the probe may well be running; this Mac just has no " +
+      "copy of its database to read. Check <span class='mono'>ops/pull_from_server.sh</span>." +
+      "</div></div>";
+  }
+
+  // The heartbeat is judged against the snapshot, and the snapshot's own age is
+  // reported separately -- a late pull must not read as a dead probe, and a fresh
+  // pull must not hide one.
+  // A headline that is a sentence ("no closed positions yet") should not shout at the
+  // same size as a number.
+  const hsz = String(p.headline.value).length > 16 ? " style='font-size:19px'" : "";
+  h += "<div class='hl'><div class='k'>" + esc(p.headline.label) + "</div>" +
+    "<div class='big'" + hsz + ">" + esc(p.headline.value) + "</div>" +
+    "<div class='n'>" + esc(p.headline.sub) + "</div></div>";
+
+  h += (p.id === "despair" ? despairNums(p) : p8Nums(p));
+
+  if(stale){
+    h += "<div class='caveat'>The local copy of this probe's database is " +
+      dur(p.replica_age_s) + " old, so everything above is a snapshot from then. " +
+      "The probe itself may be fine — this is the server→Mac pull being late.</div>";
+  }
+
+  h += "<div style='margin-top:10px'><a class='golink' href='matches.html?p=" +
+    encodeURIComponent(p.id) + "'>Every match it acted on, with the odds timeline &rarr;</a></div>";
+
+  h += fold("probe-" + p.id + "-detail", "Open the instrument",
+    (p.id === "despair" ? despairDetail(p) : p8Detail(p)) + probeCommon(p));
+  return h + "</div>";
+}
+
+function probeCommon(p){
+  let o = "<h3>Why this exists</h3><p>" + esc(p.why) + "</p>";
+  o += "<h3>Hard caps</h3><ul>" + (p.caps||[]).map(c => "<li>" + esc(c) + "</li>").join("") + "</ul>";
+  o += "<h3>Read the caveats before quoting a number</h3><ul>" +
+    (p.caveats||[]).map(c => "<li>" + esc(c) + "</li>").join("") + "</ul>";
+  o += "<h3>Operating it</h3>" +
+    "<p class='mono'>stop&nbsp;&nbsp;" + esc(p.kill) + "<br>read&nbsp;&nbsp;" + esc(p.read) + "</p>";
+  o += "<div class='meta'>Heartbeat was " + dur(p.heartbeat_age_at_snapshot) +
+    " old when this snapshot was taken; the snapshot itself is " + dur(p.replica_age_s) +
+    " old (server→Mac pull runs every 10 minutes).</div>";
+  if(p.settled_n){
+    o += "<div class='meta'>Instrument cost so far: " +
+      "<span class='" + (p.cost_c>0?"up":p.cost_c<0?"down":"") + "'>" + usd(p.cost_c) +
+      "</span> over " + p.settled_n + " settled market" + (p.settled_n===1?"":"s") +
+      " — excluded from every edge claim.</div>";
+  }
+  return o;
+}
+
+function despairNums(p){
+  const c = p.cycles || {};
+  const total = (p.rungs||[]).reduce((a,r) => a + r.orders, 0);
+  const filled = (p.rungs||[]).reduce((a,r) => a + r.fills, 0);
+  const strictF = (p.strict||[]).reduce((a,r) => a + r.fills, 0);
+  const strictN = (p.strict||[]).reduce((a,r) => a + r.orders, 0);
+  // Queue ahead is the number the backtest could never see, so it earns a tile of its
+  // own rather than repeating the headline's fill rate.
+  const qw = (p.rungs||[]).reduce((a,r) => a + (r.queue||0)*r.orders, 0);
+  const qn = (p.rungs||[]).reduce((a,r) => a + (r.queue ? r.orders : 0), 0);
+  return numrow([
+    ["Queue ahead", qn ? Math.round(qw/qn).toLocaleString() : "&mdash;",
+      "contracts in front of a 1-lot order"],
+    ["V7-strict subset", strictN + " / " + strictF,
+      "the population V7's economics rest on"],
+    ["Cycles, last 12h", (c.n || 0),
+      c.n ? "avg " + n1(c.dur_avg) + "s, worst " + n1(c.dur_max) + "s" : "no cycle rows"],
+    ["Feed-hold cycles", (c.feed_hold ?? 0),
+      (c.api_errors ?? 0) + " API errors"]
+  ]);
+}
+
+function despairDetail(p){
+  let o = "<h3>Per-rung scoreboard (lifetime)</h3>";
+  o += (p.rungs||[]).length ? tbl(
+    ["Rung","Orders","Fills","Fill %","Mean rest","Mean queue"],
+    p.rungs.map(r => [r.px + "&cent;", r.orders, r.fills,
+      r.pct === null ? "&mdash;" : "<b>" + n1(r.pct) + "%</b>",
+      r.rest_s === null ? "&mdash;" : dur(r.rest_s),
+      r.queue === null ? "&mdash;" : Number(r.queue).toLocaleString()]),
+    [], ["","r","r","r","r","r"]) : "<p class='dim'>No orders yet.</p>";
+  o += "<p class='dim' style='font-size:12px'>Rest time is the denominator: a 0% rung " +
+    "that only ever rested 20 seconds has not been measured, it has been interrupted. " +
+    "These are means, not medians.</p>";
+
+  o += "<h3>V7-strict subset (v5_pass = 1)</h3>";
+  o += (p.strict||[]).length ? tbl(["Rung","Orders","Fills"],
+    p.strict.map(r => [r.px + "&cent;", r.orders, r.fills]), [], ["","r","r"])
+    : "<p class='dim'>No strict-gate orders yet.</p>";
+
+  const f = p.fills || [];
+  o += "<h3>Recent fills</h3>";
+  o += f.length ? tbl(["When","Market","Px","Queue","Rest","+30s","+5m","+30m"],
+    f.map(x => ["<span class='dim'>" + ago(x.ts) + "</span>",
+      "<span class='mono'>" + esc((x.ticker||"").slice(0,26)) + "</span>",
+      x.px + "&cent;",
+      x.queue === null ? "&mdash;" : Math.round(x.queue).toLocaleString(),
+      dur(x.rest_s), n1(x.m30s), n1(x.m5m), n1(x.m30m)]),
+    [false,false,false,true,true,true,true,true],
+    ["","","r","r","r","r","r","r"]) : "<p class='dim'>No fills yet.</p>";
+
+  const cn = p.cancels || [];
+  if(cn.length){
+    o += "<h3>Why orders left the book (last 12h)</h3>" + tbl(["Reason","Count","Mean rest"],
+      cn.map(x => [esc(x.reason), x.n, x.rest_s === null ? "&mdash;" : dur(x.rest_s)]),
+      [], ["","r","r"]);
+  }
+  const al = p.alerts || [];
+  if(al.length){
+    o += "<h3>Alerts</h3>" + tbl(["When","Event","Detail"],
+      // A 503 body arrives as multi-line HTML; collapse it or one alert eats the table.
+      al.map(x => ["<span class='dim'>" + ago(x.ts) + "</span>", esc(x.event),
+        "<span class='mono dim'>" +
+        esc(String(x.detail||"").replace(/\s+/g," ").slice(0,120)) + "</span>"]),
+      [false,false,true]);
+  }
+  if(p.quarantined){
+    o += "<div class='caveat'>" + p.quarantined + " order(s) quarantined — withdrawn " +
+      "from reconciliation and excluded from the fill-rate table above. Investigate.</div>";
+  }
+  if(p.heartbeat_note){
+    o += "<div class='meta mono'>" + esc(p.heartbeat_note) + "</div>";
+  }
+  return o;
+}
+
+function p8Nums(p){
+  const ob = p.observed || {};
+  return numrow([
+    ["Entries filled", (p.entries||0) + (p.nofill_entries ? " / " + (p.entries+p.nofill_entries) : ""),
+      p.entry_px_mean ? "mean " + n1(p.entry_px_mean, 4) : "nothing bought yet"],
+    ["Open now", (p.states||{}).OPEN || 0, "open cost $" + n1(p.open_cost, 2)],
+    ["Median time to fill", p.rest_median === null ? "&mdash;" : dur(p.rest_median),
+      p.queue_median === null ? "queue not yet measured"
+        : "median queue " + Number(p.queue_median).toLocaleString() + " ahead"],
+    ["Favourites watched", (ob.favourites||0),
+      (ob.spiked||0) + " spiked ≥0.90 of " + (ob.markets||0) + " markets"]
+  ]);
+}
+
+function p8Detail(p){
+  let o = "";
+  if(p.closed){
+    o += "<h3>The measurement</h3>" +
+      "<p>Of " + p.closed + " closed position" + (p.closed===1?"":"s") + " whose sell " +
+      "actually rested: <b>" + p.sold + " sold</b>, " + p.nofill + " confirmed no-fill, " +
+      p.unconfirmed + " unconfirmed. That is a fill rate of <b>" + n1(p.fill_lo,0) +
+      "% to " + n1(p.fill_hi,0) + "%</b>.</p>";
+    if(p.unconfirmed > 0.1 * p.closed){
+      o += "<div class='caveat'>The interval is wide because the fills feed was down at " +
+        "close for a meaningful share of resolutions. Fix that before quoting a number — " +
+        "do not quote the lower bound.</div>";
+    }
+    if(p.never_rested){
+      o += "<p class='dim'>" + p.never_rested + " position(s) excluded: their exit never " +
+        "rested, because the book was already at or above 0.95 and post-only refused it. " +
+        "That is data too — it means the price got there.</p>";
+    }
+  } else {
+    o += "<h3>The measurement</h3><p class='dim'>No position has closed yet, so there is " +
+      "no fill rate. The instrument is accumulating.</p>";
+  }
+  if(p.exit_rejects){
+    o += "<p>" + p.exit_reject_positions + " position(s) saw " + p.exit_rejects +
+      " post-only rejection(s) — the book reached 0.9500 while the sell was resting.</p>";
+  }
+
+  const st = p.states || {};
+  const keys = Object.keys(st).sort();
+  if(keys.length){
+    o += "<h3>Position states</h3>" + tbl(["State","Count"],
+      keys.map(k => [esc(k), st[k]]), [], ["","r"]);
+  }
+
+  const pos = p.positions || [];
+  o += "<h3>Positions</h3>";
+  o += pos.length ? tbl(["When","Market","State","Entry","Queue","Rest","Outcome"],
+    pos.map(x => ["<span class='dim'>" + ago(x.entry_ts) + "</span>",
+      "<span class='mono'>" + esc((x.ticker||"").slice(0,26)) + "</span>",
+      esc(x.state),
+      x.entry_px === null ? "&mdash;" : n1(x.entry_px, 4),
+      x.exit_queue === null ? "&mdash;" : Number(x.exit_queue).toLocaleString(),
+      dur(x.rest_s),
+      "<span class='dim'>" + esc(x.outcome || "—") + "</span>"]),
+    [false,false,false,true,true,true,true]) : "<p class='dim'>Nothing entered yet.</p>";
+
+  if(p.verdict_why){
+    o += "<div class='caveat'>" + esc(p.verdict_why) + "</div>";
+  }
+  return o;
+}
+
+/* ============================ 3. PIPELINE ================================ */
+
+const STAGE = {
+  refinement: ["Refinement", "Being hardened toward deployment — forward paper protocols, queue-aware fill tests, sizing work, and the pre-registration that has to happen before any live step."],
+  fleshing:   ["Fleshing", "Full multi-stage development of a graduated idea: exit branches, condition screens, combinations, sizing, replay. Most ideas die here, and the verdicts stay listed so they stay dead."],
+  brainstorm: ["Brainstorm", "Idea generation and broad screening. A promote reserves a number and enters fleshing at Stage 0."]
+};
+
+function ideaCard(e, styles){
+  const cls = styles[e.status] || "muted";
+  let h = "<div class='card'><div class='tophead'><div>" +
+    "<div class='nm'>" + esc(e.title) +
+      (e.code ? " <span class='dim' style='font-weight:400;font-size:12.5px'>" +
+        esc(e.code) + "</span>" : "") + "</div>" +
+    "<div class='one'>" + esc(e.one_line) + "</div></div>" +
+    "<div style='text-align:right;flex:none'>" + chip(e.status, cls) +
+      (e.probe ? "<br><span class='chip plain' style='margin-top:5px'>live probe</span>" : "") +
+    "</div></div>";
+  h += numrow((e.headline||[]).map(([k,v,n]) => [k, esc(v), n ? esc(n) : ""]));
+  h += fold("idea-" + e.id, "Read the verdict",
+    paras(e.summary, true) +
+    (e.next ? "<div class='next'><b>Next:</b> " + esc(e.next) + "</div>" : "") +
+    (e.pointer ? "<div class='path'>" + esc(e.pointer) + "</div>" : ""));
+  return h + "</div>";
+}
+
+/* ============================ RENDER ===================================== */
+
+function render(d){
+  const bots = d.bots || [], probes = d.probes || [], pipe = d.pipeline || [];
+  const liveBots = bots.filter(b => b.live);
+  const styles = d.status_styles || {};
+
+  // header
+  const bad = probes.filter(p => ["DOWN","BLIND","STALE","NO DATA","NO REPLICA"].includes(p.verdict));
+  const halted = probes.filter(p => p.verdict === "HALTED");
+  let txt, col, pulse;
+  if(bad.length){ txt = bad.length + " PROBE ISSUE" + (bad.length>1?"S":""); col = "var(--crit)"; pulse = false; }
+  else if(halted.length){ txt = "PROBE HALTED"; col = "var(--warn)"; pulse = false; }
+  else if(probes.length){ txt = probes.length + " PROBES LIVE"; col = "var(--good)"; pulse = true; }
+  else { txt = "NOTHING LIVE"; col = "var(--muted)"; pulse = false; }
+  const pill = document.getElementById("statepill");
+  pill.style.color = col;
+  document.getElementById("statetxt").textContent = txt;
+  pill.querySelector(".dot").className = "dot" + (pulse ? " pulse" : "");
+  document.getElementById("sub").innerHTML =
+    liveBots.length + " bot" + (liveBots.length===1?"":"s") + " trading &middot; " +
+    probes.length + " probe" + (probes.length===1?"":"s") + " &middot; " +
+    pipe.length + " ideas &middot; data " + ago(d.generated);
+
+  // alerts
+  const al = [];
+  // 25 minutes, not 7: the mirror publishes every 10 minutes (GitHub Pages caps builds
+  // at ~10/hour), so anything tighter cries wolf on a healthy site. localhost:8787
+  // builds on request and is never stale.
+  const age = Date.now()/1000 - d.generated;
+  if(age > 1500) al.push("<div class='stale'>This page's data is " + dur(age) +
+    " old — the publisher on the Mac has stopped, or GitHub Pages is refusing to " +
+    "build. Check <span class='mono'>live/web/publish.out</span>.</div>");
+  bad.forEach(p => al.push("<div class='stale'>" + esc(p.name) + ": " + esc(p.verdict) +
+    (p.verdict_why ? " — " + esc(p.verdict_why) : "") + "</div>"));
+  probes.filter(p => p.replica_stale && p.available).forEach(p =>
+    al.push("<div class='warnbar'>" + esc(p.name) + ": the Mac's copy of its database is " +
+      dur(p.replica_age_s) + " old. The probe may be fine — check the pull.</div>"));
+  document.getElementById("alert").innerHTML = al.join("");
+
+  const o = [];
+
+  // --- 1. bots -------------------------------------------------------------
+  o.push(sec("Live betting bots", liveBots.length,
+    "Anything placing real bets to make money. The live-trading HOLD is in force, so " +
+    "this is empty by design — nothing is promoted to a bot until a probe has measured " +
+    "its fills."));
+  if(liveBots.length){
+    o.push(liveBots.map(b => botCard(b, d)).join(""));
+  } else {
+    o.push("<div class='empty'><b>None.</b> No strategy is trading. " +
+      esc((d.notes||{}).hold || "") + "</div>");
+  }
+  const retired = bots.filter(b => !b.live);
+  if(retired.length){
+    o.push("<div class='secsub' style='margin:14px 0 8px'>Retired &mdash; kept because " +
+      "the record is the evidence.</div>");
+    o.push(retired.map(b => botCard(b, d)).join(""));
+  }
+
+  // --- 2. probes -----------------------------------------------------------
+  o.push(sec("Live probes", probes.length,
+    "One-contract instruments on the real exchange. They exist to measure what no " +
+    "historical tape can answer — whether an order actually fills — and their P&amp;L " +
+    "is an instrument cost, never an edge claim. Tap one to open it."));
+  o.push(probes.length ? probes.map(probeCard).join("")
+    : "<div class='empty'>No probes running.</div>");
+
+  // --- 3. pipeline ---------------------------------------------------------
+  o.push(sec("Ideas in the pipeline", pipe.length,
+    "Every strategy under development, newest stage first. An idea moves " +
+    "brainstorm → fleshing → refinement, and most die on the way."));
+  ["refinement","fleshing","brainstorm"].forEach(stage => {
+    const list = pipe.filter(e => e.stage === stage);
+    const [name, blurb] = STAGE[stage];
+    o.push("<div class='sec' style='margin:22px 0 9px'><div class='sechead'>" +
+      "<h2>" + name + "</h2><span class='count'>" + list.length + "</span></div>" +
+      "<div class='secsub'>" + blurb + "</div></div>");
+    o.push(list.length ? list.map(e => ideaCard(e, styles)).join("")
+      : "<div class='empty'>Nothing at this stage.</div>");
+    if(stage === "brainstorm" && (d.killed_brainstorm||[]).length){
+      o.push(fold("killed", "Killed ideas — listed so they stay dead",
+        tbl(["Id","Spec","Why it died"],
+          d.killed_brainstorm.map(([id,spec,why]) =>
+            ["<span class='mono'>" + esc(id) + "</span>", esc(spec),
+             "<span class='dim'>" + esc(why) + "</span>"]),
+          [false,false,true])));
+    }
+  });
+
+  document.getElementById("body").innerHTML = o.join("");
+
+  // restore + track expander state
+  document.querySelectorAll("details[data-k]").forEach(el => {
+    el.addEventListener("toggle", () => {
+      if(el.open) OPEN.add(el.dataset.k); else OPEN.delete(el.dataset.k);
+    });
+  });
+
+  const acct = d.account || {};
+  document.getElementById("foot").innerHTML =
+    "Read-only mirror of the command center on the Mac mini. The recorders and both " +
+    "probes run on the Lightsail box; their databases are pulled down every 10 minutes " +
+    "and this page is published on the same cadence. There is no path from this page " +
+    "back to any engine — no credentials, no order entry, no kill switch." +
+    "<br>Kalshi account realized across all instruments: " + usd(acct.kalshi_realized_c) +
+    " over " + (acct.settled_n||0) + " settlements" +
+    (acct.ambiguous ? " (" + acct.ambiguous + " could not be attributed to a single instrument)" : "") +
+    ". " + esc((d.notes||{}).tape_a || "") +
+    "<br>Catalogue last edited " + esc(d.catalog_updated || "?") +
+    (d.catalog_updated_by ? " by " + esc(d.catalog_updated_by) : "") +
+    " &middot; last publish " + ago(d.generated) + ".";
+}
+
+function sec(title, count, blurb){
+  return "<div class='sec'><div class='sechead'><h2>" + title +
+    "</h2><span class='count'>" + count + "</span></div>" +
+    "<div class='secsub'>" + blurb + "</div></div>";
+}
+
+/* --- retired-004 price charts (unchanged) -------------------------------- */
+const VCOL = {kalshi:"var(--s1)", pm:"var(--s3)"};
+const VNAME = {kalshi:"Kalshi", pm:"Polymarket"};
+
+function betChart(list){
+  const withPath = list.filter(b => (b.path||[]).length >= 2);
+  if(!withPath.length) return "<div class='nochart dim'>No price history recorded.</div>";
+  const W=320, H=112, L=20, R=6, T=7, B=15;
+  let t0 = Infinity, t1 = -Infinity;
+  withPath.forEach(b => {
+    b.path.forEach(p => { if(p[0]<t0) t0=p[0]; if(p[0]>t1) t1=p[0]; });
+    (b.fills||[]).forEach(f => { if(f[0]<t0) t0=f[0]; if(f[0]>t1) t1=f[0]; });
+    if(b.settled_ts && b.settled_ts>t1) t1=b.settled_ts;
+  });
+  const span = Math.max(1, t1 - t0);
+  const X = t => L + ((t - t0)/span) * (W-L-R);
+  const Y = p => T + (1 - Math.max(0,Math.min(100,p))/100) * (H-T-B);
+  let s = "<svg class='chart' viewBox='0 0 "+W+" "+H+"' role='img' aria-label='price path'>";
+  s += "<rect x='"+L+"' y='"+Y(12).toFixed(1)+"' width='"+(W-L-R)+"' height='"+(Y(0)-Y(12)).toFixed(1)+
+       "' fill='var(--s2)' opacity='.10'/>";
+  [0,12,50,100].forEach(v => {
+    s += "<line x1='"+L+"' x2='"+(W-R)+"' y1='"+Y(v).toFixed(1)+"' y2='"+Y(v).toFixed(1)+
+         "' stroke='var(--grid)' stroke-width='.5'/>" +
+         "<text x='"+(L-3)+"' y='"+(Y(v)+3).toFixed(1)+"' text-anchor='end' font-size='7' fill='var(--muted)'>"+v+"</text>";
+  });
+  withPath.forEach(b => {
+    const col = VCOL[b.venue] || "var(--s1)";
+    s += "<polyline fill='none' stroke='"+col+"' stroke-width='1.4' stroke-linejoin='round' points='" +
+         b.path.map(p => X(p[0]).toFixed(1)+","+Y(p[1]).toFixed(1)).join(" ") + "'/>";
+    if(b.arm_ts && b.arm_ts >= t0 && b.arm_ts <= t1)
+      s += "<line x1='"+X(b.arm_ts).toFixed(1)+"' x2='"+X(b.arm_ts).toFixed(1)+"' y1='"+T+"' y2='"+(H-B)+
+           "' stroke='"+col+"' stroke-width='1' stroke-dasharray='3 2' opacity='.75'/>";
+    (b.fills||[]).forEach(f => {
+      s += "<circle cx='"+X(f[0]).toFixed(1)+"' cy='"+Y(f[1]).toFixed(1)+"' r='2.6' fill='"+col+
+           "' stroke='var(--surface)' stroke-width='.8'/>";
+    });
+    if(b.settled_ts && b.result !== "open"){
+      const won = b.result === "won";
+      s += "<circle cx='"+X(b.settled_ts).toFixed(1)+"' cy='"+Y(won?100:0).toFixed(1)+
+           "' r='3.2' fill='"+(won?"var(--good)":"var(--crit)")+"'/>";
+    }
+  });
+  return s + "</svg>";
+}
+
+function legLine(b){
+  const open = b.result === "open", won = b.result === "won";
+  const qty = (b.fills||[]).reduce((a,f)=>a+f[2],0);
+  const avg = qty ? (b.cost_c/qty) : null;
+  return "<div class='leg'><div class='legtop'>" +
+    "<span class='swatch' style='background:" + (VCOL[b.venue]||"var(--s1)") + "'></span>" +
+    "<span class='chip plain'>" + VNAME[b.venue] + "</span>" +
+    "<span class='who'>" + esc(b.player) + "</span>" +
+    "<span class='legpnl " + (open?"dim":(won?"up":"down")) + "'>" +
+      (open ? "open" : (b.pnl_c>0?"+":"") + usd(b.pnl_c)) + "</span></div>" +
+    "<div class='legsub dim'>" + qty + " @ " + (avg!==null ? avg.toFixed(2)+"&cent;" : "&mdash;") +
+    " &middot; cost " + usd(b.cost_c) + (open ? "" : " &middot; payout " + usd(b.payout_c)) +
+    "</div></div>";
+}
+
+function groupCard(g){
+  const cls = g.open ? "" : (g.pnl_c > 0 ? " won" : " lost");
+  const multi = g.bets.length > 1;
+  const head = multi
+    ? "<div class='nm'>" + esc(g.match) + "</div><div class='bmeta'>" + g.bets.length +
+      " ladders &middot; " + g.venues.map(v => VNAME[v]).join(" + ") + "</div>"
+    : "<div class='nm'>" + esc(g.bets[0].player) + "</div><div class='bmeta'>" +
+      esc(g.match || "") + "</div>";
+  const pnl = g.open && !g.pnl_c ? "open" : (g.pnl_c>0?"+":"") + usd(g.pnl_c) + (g.open ? " so far" : "");
+  const qty = (g.bets[0].fills||[]).reduce((a,f)=>a+f[2],0);
+  return "<div class='bet" + cls + (multi ? " multi" : "") + "'>" +
+    "<div class='bethead'><div>" + head + "</div><div style='text-align:right;flex:none'>" +
+      "<span class='chip plain'>" + (multi ? "both venues" : VNAME[g.bets[0].venue]) + "</span><br>" +
+      "<span class='res " + (g.open && !g.pnl_c ? "dim" : (g.pnl_c>0?"up":"down")) + "'>" +
+      pnl + "</span></div></div>" + betChart(g.bets) +
+    (multi ? "<div class='legs'>" + g.bets.map(legLine).join("") + "</div>"
+           : "<div class='betfoot'><span>" + qty + " @ " +
+             (qty ? (g.bets[0].cost_c/qty).toFixed(2)+"&cent;" : "&mdash;") + "</span>" +
+             "<span>cost " + usd(g.bets[0].cost_c) + "</span><span>" +
+             (g.bets[0].result === "open" ? "held" : "payout " + usd(g.bets[0].payout_c)) +
+             "</span><span class='dim'>armed " + (g.bets[0].arm_price_c ?? "&mdash;") +
+             "&cent; &middot; " + ago(g.ts) + "</span></div>") + "</div>";
+}
+
+/* --- fetch loop ---------------------------------------------------------- */
+// A snapshot written by `dashboard.py --once file.html` inlines its payload, so the
+// file renders with no network at all. Live pages have no such element and fetch.
+const INLINE = document.getElementById("payload");
+if(INLINE){
+  last = JSON.parse(INLINE.textContent);
+  render(last);
+  setInterval(() => render(last), 5000);
+}
+
+async function tick(){
+  try{
+    const r = await fetch("data.json?t=" + Date.now(), {cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    last = await r.json();
+    render(last);
+  }catch(e){
+    if(last) render(last);
+    else document.getElementById("alert").innerHTML =
+      "<div class='stale'>Can't load data.json &mdash; " + esc(e.message) + "</div>";
+  }
+}
+if(!INLINE){
+  tick();
+  setInterval(tick, REFRESH);
+  document.addEventListener("visibilitychange", () => { if(!document.hidden) tick(); });
+  setInterval(() => { if(last) render(last); }, 5000);   // keep "x ago" ticking
+}
+</script>
+</body>
+</html>
